@@ -538,7 +538,7 @@ fn find_torpedo_path(start_sector: Pos, course: f32) -> Vec<Pos> {
         if nx < 0.0 || ny < 0.0 || nx >= 8.0 || ny >= 8.0 {
             break;
         }
-        let step = Pos(nx as u8, ny as u8);
+        let step = Pos(nx.round() as u8, ny.round() as u8);
         if step != last_sector {
             last_sector = step;
             path.push(last_sector);
@@ -554,7 +554,7 @@ mod tests {
 
     #[test]
     fn test_find_torpedo_path() {
-        let path = find_torpedo_path(Pos(0, 0), 7.5);
+        let path = find_torpedo_path(Pos(0, 0), 7.45);
         assert_eq!(
             *path.last().unwrap(),
             Pos(7, 3),
@@ -563,5 +563,22 @@ mod tests {
             path,
             vec!(Pos(1, 0), Pos(2, 1), Pos(3, 1), Pos(4, 2), Pos(5, 2), Pos(6, 3), Pos(7, 3))
         );
+
+        assert_eq!(
+            find_torpedo_path(Pos(4, 7), 4.5),
+            vec!(Pos(4, 6), Pos(3, 5), Pos(3, 4), Pos(2, 3), Pos(2, 2), Pos(1, 1), Pos(1, 0))
+        );
+
+        let enterprise = Pos(3, 3);
+        for y in 0..=7 {
+            for x in 0..=7 {
+                let pos = Pos(y, x);
+                if pos != enterprise {
+                    let course = enterprise.direction(pos);
+                    let path = find_torpedo_path(enterprise, course);
+                    assert!(path.contains(&pos));
+                };
+            };
+        };
     }
 }
